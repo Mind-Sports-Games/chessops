@@ -306,6 +306,46 @@ export class KingOfTheHill extends Chess {
   }
 }
 
+export class TwoCheck extends Chess {
+  protected constructor() {
+    super('2check');
+  }
+
+  static default(): TwoCheck {
+    const pos = super.default();
+    pos.remainingChecks = RemainingChecks.twoCheck();
+    return pos;
+  }
+
+  static fromSetup(setup: Setup): Result<TwoCheck, PositionError> {
+    return super.fromSetup(setup).map(pos => {
+      pos.remainingChecks = setup.remainingChecks ? setup.remainingChecks.clone() : RemainingChecks.default();
+      return pos;
+    });
+  }
+
+  clone(): TwoCheck {
+    return super.clone() as TwoCheck;
+  }
+
+  hasInsufficientMaterial(color: Color): boolean {
+    return this.board.pieces(color, 'king').equals(this.board[color]);
+  }
+
+  isVariantEnd(): boolean {
+    return !!this.remainingChecks && (this.remainingChecks.white <= 0 || this.remainingChecks.black <= 0);
+  }
+
+  variantOutcome(_ctx?: Context): Outcome | undefined {
+    if (this.remainingChecks) {
+      for (const color of COLORS) {
+        if (this.remainingChecks[color] <= 0) return { winner: color };
+      }
+    }
+    return;
+  }
+}
+
 export class ThreeCheck extends Chess {
   protected constructor() {
     super('3check');
@@ -505,6 +545,8 @@ export function defaultPosition(rules: Rules): Position {
       return RacingKings.default();
     case 'kingofthehill':
       return KingOfTheHill.default();
+    case '2check':
+      return TwoCheck.default();
     case '3check':
       return ThreeCheck.default();
     case 'crazyhouse':
@@ -526,6 +568,8 @@ export function setupPosition(rules: Rules, setup: Setup): Result<Position, Posi
       return RacingKings.fromSetup(setup);
     case 'kingofthehill':
       return KingOfTheHill.fromSetup(setup);
+    case '2check':
+      return TwoCheck.fromSetup(setup);
     case '3check':
       return ThreeCheck.fromSetup(setup);
     case 'crazyhouse':

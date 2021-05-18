@@ -112,6 +112,10 @@ export class RemainingChecks {
     return new RemainingChecks(3, 3);
   }
 
+  static twoCheck(): RemainingChecks {
+    return new RemainingChecks(2, 2);
+  }
+
   clone(): RemainingChecks {
     return new RemainingChecks(this.white, this.black);
   }
